@@ -36,7 +36,7 @@ jobs:
           echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_OUTPUT
 
       - name: Rename APKs
-        run: ./gradlew renameApkWithAppName
+        run: ./gradlew renameDebugApkWithAppName
         
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
