@@ -38,3 +38,15 @@ dependencies {
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
 }
+
+task printVersionName {
+    doLast {
+        println android.defaultConfig.versionName
+    }
+}
+
+task printVersionCode {
+    doLast {
+        println android.defaultConfig.versionCode
+    }
+}
