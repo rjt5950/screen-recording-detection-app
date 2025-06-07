@@ -45,8 +45,15 @@ task printVersionName {
     }
 }
 
-task printVersionCode {
+task renameDebugApkWithAppName {
     doLast {
-        println android.defaultConfig.versionCode
+        def versionName = android.defaultConfig.versionName
+        def appName = "ScreenRecordingDetection"
+        def debugApk = file("$buildDir/outputs/apk/debug/app-debug.apk")
+        if (debugApk.exists()) {
+            def newName = "$buildDir/outputs/apk/debug/${appName}-v${versionName}-debug.apk"
+            debugApk.renameTo(new File(newName))
+        }
     }
 }
+
