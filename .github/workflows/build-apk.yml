@@ -27,7 +27,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build APK
-        run: ./gradlew :app:assembleDebug :app:assembleRelease
+        run: ./gradlew :app:assembleDebug
 
       - name: Get Version Name from Gradle
         id: version
@@ -38,16 +38,9 @@ jobs:
       - name: Rename APKs
         run: |
           mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/app-v${{ steps.version.outputs.VERSION_NAME }}-debug.apk
-          mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/app-v${{ steps.version.outputs.VERSION_NAME }}-release.apk
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: app-v${{ steps.version.outputs.VERSION_NAME }}-debug
           path: app/build/outputs/apk/debug/app-v${{ steps.version.outputs.VERSION_NAME }}-debug.apk
-
-      - name: Upload Release APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-v${{ steps.version.outputs.VERSION_NAME }}-release
-          path: app/build/outputs/apk/release/app-v${{ steps.version.outputs.VERSION_NAME }}-release.apk
