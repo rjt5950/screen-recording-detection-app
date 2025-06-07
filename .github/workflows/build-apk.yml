@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Debug APK
 
 on:
   push:
@@ -27,7 +27,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build APK
-        run: ./gradlew :app:assembleDebug
+        run: ./gradlew :app:assembleDebug --stacktrace
 
       - name: Get Version Name from Gradle
         id: version
