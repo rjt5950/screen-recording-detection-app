@@ -21,7 +21,7 @@ This open-source android app provides real-time detection by triggering a callba
 
 ## Getting Started
 ### APK for Testing
-You can download the APK file for quick testing. To install the app, use the following ADB command:  
+You can download the artifacts file from **Actions** section for quick testing. To install the app, use the following ADB command:  
 `adb install -t app-debug.apk`  
 
 ### How to Use
