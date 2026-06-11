@@ -4,6 +4,7 @@ on:
   push:
     branches: [ main ]
   pull_request:
+    branches: [ main ]
 
 jobs:
   build:
@@ -17,8 +18,9 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
           java-version: 17
+          distribution: 'temurin'
+          cache: gradle
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
@@ -34,17 +36,26 @@ jobs:
       - name: Build APK
         run: ./gradlew :app:assembleDebug --stacktrace
 
-      - name: Get Version Name from Gradle
-        id: version
+      - name: Get app info (name, versionCode, versionName)
+        id: app_info
         run: |
-          VERSION_NAME=$(./gradlew -q printVersionName | tail -n 1)
-          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_OUTPUT
+          APP_NAME=$(grep 'name="app_name"' app/src/main/res/values/strings.xml | sed 's/.*>\(.*\)<\/string>.*/\1/')
+          VERSION_CODE=$(grep 'versionCode' app/build.gradle | head -1 | sed 's/.*versionCode\s*\([0-9]*\).*/\1/')
+          VERSION_NAME=$(grep 'versionName' app/build.gradle | head -1 | sed 's/.*versionName\s*"\([^"]*\)".*/\1/')
 
-      - name: Rename APKs
-        run: ./gradlew renameDebugApkWithAppName
+          echo "app_name=$APP_NAME" >> $GITHUB_OUTPUT
+          echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
+          echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
         
-      - name: Upload Debug APK
-        uses: actions/upload-artifact@v4
+      - name: Rename APK
+        run: |
+          APK_PATH=$(find app/build/outputs/apk/debug -name "*.apk" -type f | head -1)
+          NEW_NAME="${{ steps.app_info.outputs.app_name }}_debug_${{ steps.app_info.outputs.version_code }}_${{ steps.app_info.outputs.version_name }}.apk"
+          mv "$APK_PATH" "app/build/outputs/apk/debug/$NEW_NAME"
+        
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v3
         with:
-          name: ScreenRecordingDetection-v${{ steps.version.outputs.VERSION_NAME }}-debug
-          path: app/build/outputs/apk/debug/ScreenRecordingDetection-v${{ steps.version.outputs.VERSION_NAME }}-debug.apk
+          name: debug-apk
+          path: app/build/outputs/apk/debug/*_debug_*.apk
+          retention-days: 30
