@@ -10,7 +10,7 @@ jobs:
   build:
     name: Build Debug APK
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -20,21 +20,19 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: gradle
+          cache: 'gradle'  # This is the important cache!
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
       - name: Install Android SDK Platform 35 and Build Tools 35
-        run: |
-          sdkmanager --update
-          sdkmanager "platforms;android-35" "build-tools;35.0.0"
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
       - name: Grant permission to execute gradlew
         run: chmod +x ./gradlew
 
       - name: Build APK
-        run: ./gradlew :app:assembleDebug --stacktrace
+        run: ./gradlew :app:assembleDebug --stacktrace --parallel
 
       - name: Get app info (name, versionCode, versionName)
         id: app_info
@@ -58,4 +56,4 @@ jobs:
         with:
           name: debug-apk
           path: app/build/outputs/apk/debug/*_debug_*.apk
-          retention-days: 7
+          retention-days: 30
