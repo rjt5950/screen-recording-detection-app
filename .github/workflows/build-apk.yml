@@ -2,9 +2,7 @@ name: Build Debug APK
 
 on:
   push:
-    branches:
-    - main
-    - test
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -12,7 +10,7 @@ jobs:
   build:
     name: Build Debug APK
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -22,45 +20,19 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: gradle  # Caches Gradle dependencies
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-home-cache-cleanup: true
-          build-scan-publish: true
-          build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
-          build-scan-terms-of-use-agree: "yes"
+          cache: 'gradle'  # This is the important cache!
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Cache Android SDK
-        uses: actions/cache@v4
-        with:
-          path: |
-            /usr/local/lib/android/sdk
-            ~/.android
-          key: ${{ runner.os }}-android-sdk-${{ hashFiles('**/build.gradle*') }}
-          restore-keys: |
-            ${{ runner.os }}-android-sdk-
-
       - name: Install Android SDK Platform 35 and Build Tools 35
-        run: |
-          sdkmanager --update
-          sdkmanager "platforms;android-35" "build-tools;35.0.0"
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
       - name: Grant permission to execute gradlew
         run: chmod +x ./gradlew
 
       - name: Build APK
-        run: |
-          ./gradlew :app:assembleDebug \
-            --no-daemon \
-            --stacktrace \
-            --parallel \
-            --max-workers=2 \
-            -Porg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=512m"
+        run: ./gradlew :app:assembleDebug --stacktrace --parallel
 
       - name: Get app info (name, versionCode, versionName)
         id: app_info
@@ -84,4 +56,4 @@ jobs:
         with:
           name: debug-apk
           path: app/build/outputs/apk/debug/*_debug_*.apk
-          retention-days: 7
+          retention-days: 30
